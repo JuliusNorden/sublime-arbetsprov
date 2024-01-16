@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Arbetsprov.Models.Program.ProgramModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<script src="/_framework/aspnetcore-browser-refresh.js"></script>
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 20px;
+        margin-top: 20px;
+    }
+
+    hr.solid {
+        border-top: 3px solid #bbb;
+        opacity: 0.33;
+    }
+</style>
+
+@foreach(var channel in Model.Where(x => x.Channel != null && x.Channel.Name != null).GroupBy(x => x.Channel!.Name!).ToDictionary(x => x.Key!, x => x.ToList()))
+{
+    <div>
+        <h1>
+            @channel.Key
+        </h1>
+        @foreach(var program in channel.Value) {
+            <div class="grid-container">
+                <div class="grid-child">
+                    <h3>@program.Name</h3>
+                    <img src="@program.ProgramImage" />
+                    <p>@program.Description</p>
+                </div>
+                <div class="grid-child">
+                    <h3>Podavsnitt</h3>
+                    @foreach(var pod in program.PodEpisodes!.OrderBy(x => x.Date).Take(3)) {
+                        <div>
+                            <p><b>Titel:</b> @pod.Title</p>
+                            <p><b>Publicerat:</b> @pod.Date</p>
+                            <p><b>Längd:</b> @TimeSpan.FromSeconds(pod.Duration!.Value).ToString(@"hh\:mm\:ss")</p>
+                            <audio controls>
+                                <source src="@pod.URL" type="audio/mp3" />
+                            </audio>
+                        </div>
+                        <hr class="solid" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
